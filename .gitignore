@@ -1,0 +1,8 @@
+.work/
+node_modules/
+*.zip
+.env
+.env.*
+credentials*
+Agent.md
+handoff.md

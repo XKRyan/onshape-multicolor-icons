@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onshape 与 SOLIDWORKS：零件颜色对齐</title><link rel="stylesheet" href="color-guide.css"></head><body><main>
+<p class="eyebrow">普通带边线上色 · 未开启 RealView</p><h1>同一个色号，为什么零件看起来不同？</h1>
+<p class="lead">色号决定外观底色。屏幕上的颜色，是底色经过光照、高光和阴影处理后的结果。要接近熟悉的 SOLIDWORKS 观感，应先对齐显示条件。</p>
+<section><h2>已确认的差异</h2><div class="facts"><article><h3>光照会改变明暗</h3><p>Onshape 当前公开的常规面着色路径包含环境底光和方向光。不同朝向的面即使使用同一色号，也会显示不同亮度。SOLIDWORKS 普通上色同样受场景的环境光和方向光影响。</p></article><article><h3>白色高光可能冲淡颜色</h3><p>Onshape 会在受光底色上叠加镜面高光。中性高光增加各颜色通道的亮度，在高光位置可能降低可见饱和度。光泽度越高主要意味着高光更集中，而非所有位置都更亮。</p></article><article><h3>遮蔽不是环境亮度</h3><p>“环境光遮蔽”使接缝、凹槽等位置变暗。它不会把整个模型照亮，也不是整体饱和度控制。用它补偿偏淡颜色，容易让缝隙显得更脏。</p></article></div>
+<p class="note">当前证据不足以认定 Onshape 给整个模型加入了某种偏色滤镜，也不能认定你的问题就是伽马或显示器色彩配置。若排除高光后仍有稳定色偏，需要两款软件在相同条件下的截图进一步判断。</p></section>
+<section><h2>观察光照如何改变同一底色</h2><p>调整底色和高光，观察颜色如何变亮或被冲淡。这是简化光照示意，不是两款软件的实测截图，也不是色彩校准工具。</p>
+<div class="controls"><label>底色色号<input id="base" type="color" value="#2d6ab3"></label><label>中性高光贡献 <output id="spec-value">0%</output><input id="spec" type="range" min="0" max="60" value="0"></label><label>朝向光源程度 <output id="light-value">60%</output><input id="light" type="range" min="0" max="100" value="60"></label></div>
+<div class="swatches"><div><div class="swatch" id="input-swatch"></div><b>输入底色</b><code id="input-hex"></code></div><div><div class="swatch" id="shaded-swatch"></div><b>受光后的面</b><code id="shaded-hex"></code></div><div><div class="swatch" id="spec-swatch"></div><b>叠加中性高光</b><code id="spec-hex"></code></div></div>
+<p class="small">示意以底色乘以 0.5–1.0 的受光系数，再增加中性高光并限制到显示范围。高光滑块表示贡献量，不对应 Onshape 的“光泽度”百分比。未模拟完整显示转换、透明叠加或 SOLIDWORKS 场景。</p></section>
+<section><h2>先做一次去高光对照</h2><p>保留原来的零件 RGB 色号，记下当前图形设置，取消选择和悬停高亮，使用不透明的普通带边线上色。检查零件是否还存在单独的面、特征或配置外观。</p>
+<table><thead><tr><th>Onshape 图形首选项</th><th>临时诊断设置</th><th>用途</th></tr></thead><tbody><tr><td>镜面反射颜色</td><td><code>#000000</code></td><td>暂时消除镜面高光，不会把零件底色设成黑色</td></tr><tr><td>环境光遮蔽</td><td>0%</td><td>排除凹槽和接缝暗化</td></tr><tr><td>光泽度</td><td>3%</td><td>回到本次核对的默认起点；镜面反射为黑色时，该项不再贡献可见高光</td></tr><tr><td>实体线宽</td><td>0.6 px</td><td>保留清晰但不过粗的边线</td></tr></tbody></table>
+<p>如果发白明显减轻，主要应调整高光，而不是寻找更深、更艳的替代色号。随后可试中性弱高光 <code>#333333–#555555</code>、光泽度 3–8%、环境光遮蔽 20–35%，每次只调一项。这些是试调起点，不是经过双软件实测匹配的预设。</p>
+<p>若去除高光后仍不一致：在两边用同一个简单立方体、同一底色、相近朝向、无透明效果进行比较。先用中性灰检查整体明暗，再用红、绿、蓝色检查是否有稳定的色偏。SOLIDWORKS 需同时核对场景、环境光与方向光，不能只核对 RGB 输入框。</p></section>
+<section><h2>扩展能改善到哪一步</h2><p>多色图标扩展处理界面图标的线与面；零件着色由建模视口的渲染器完成。原生设置可以调整线宽、高光和遮蔽，但目前未找到可让浏览器扩展通过公开、稳定接口完整替换这套建模光照的办法。</p>
+<p>对整个视口增加饱和度滤镜，会同时影响零件、草图、选择高亮和分析色标；它也无法同时纠正不同朝向的面。因此，这个版本不自动改变视口色彩，也不把这样的滤镜称为 SOLIDWORKS 色彩匹配。</p>
+<p>若以后要精确接近你的 SW 普通上色，需要先确定一组参考截图、颜色和光照设置，再验证同一调整是否对多个朝向、多种底色都有效。单张图里“看起来更艳”不足以证明已匹配。</p></section>
+<section class="sources"><h2>依据与适用范围</h2><ul><li><a href="https://cad.onshape.com/help/Content/View/graphics_preferences.htm">Onshape：图形偏好、光泽与镜面反射颜色</a></li><li><a href="https://cad.onshape.com/help/Content/PartStudio/customizing_appearances.htm">Onshape：零件、面与特征的外观</a></li><li><a href="https://help.solidworks.com/2024/english/SolidWorks/sldworks/c_Scenes_and_Lighting_2.htm">SOLIDWORKS：场景与光照，普通图形同样受场景照明影响</a></li><li><a href="https://help.solidworks.com/2024/english/solidworks/sldworks/c_realview.htm">SOLIDWORKS：RealView 开关的效果区别</a></li><li><a href="https://cad.onshape.com/js/woolsthorpe.1b7f617f1ff70058bc61.js">本次核对的 Onshape 公开客户端资源</a>：常规面着色、高光指数及默认值；具体代码可能随更新改变。</li></ul><p class="small">核对日期：2026-09-10。当前未取得两款软件的受控对照截图，尚不能给出经过实测的色号转换或统一匹配预设。</p></section>
+<a href="guide.html">← 返回安装与草图设置指南</a>
+</main><script src="color-guide.js"></script></body></html>

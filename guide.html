@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onshape 显示设置指南</title>
+<style>
+body{font:16px/1.8 "Segoe UI","Microsoft YaHei",sans-serif;color:#253344;background:#f5f7fa;margin:0;padding:40px 20px}main{max-width:820px;margin:auto;background:white;padding:40px 48px;border-radius:14px}h1{font-size:28px;line-height:1.4;margin-top:0}h2{font-size:20px;margin-top:32px}a{color:#195fae}table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;padding:10px 12px;border-bottom:1px solid #dce3ea}th{background:#f0f4f8}.lead{font-size:18px}.note{background:#edf4fc;border-left:3px solid #287bd0;padding:12px 16px}.muted{font-size:13px;color:#5f6b79}code{font-size:14px;overflow-wrap:anywhere}@media(max-width:600px){main{padding:22px}body{padding:12px}td,th{padding:7px}}
+</style></head><body><main>
+<h1>让 Onshape 更清晰、更容易辨认</h1>
+<p class="lead">用原生设置调细草图、调整零件显示，再用蓝白黑多色图标辨认原生命令。</p>
+<h2>1. 草图线变细</h2>
+<p>进入 Part Studio，在视图立方体附近打开 <strong>Camera and render options → Graphics preferences → Sketch</strong>（相机和渲染选项 → 图形偏好 → 草图）。活动与非活动草图线宽均支持 0.1–3 px。</p>
+<table><tr><th>设置</th><th>建议试用起点</th></tr><tr><td>Active sketches → Line width</td><td>1.0 px；仍偏粗可试 0.7–0.8 px</td></tr><tr><td>Inactive sketches → Line width</td><td>0.6–0.8 px</td></tr><tr><td>Constrained line color</td><td>深黑灰 #20252B</td></tr><tr><td>Underconstrained color</td><td>清晰蓝色 #125CE0</td></tr></table>
+<p class="muted">这些数值是便于试调的建议，不是 SOLIDWORKS 官方预设。深色主题下请改用更亮的约束线颜色，确保看得清楚。</p>
+<p>高分辨率屏幕若仍显得粗糙，检查 <strong>My account → Preferences → Environment profile settings → Match pixel density → On</strong>，保存并选用该设备配置；较高显示分辨率可能增加图形负载。</p>
+<p>来源：<a href="https://cad.onshape.com/help/Content/View/graphics_preferences.htm">图形偏好</a>、<a href="https://cad.onshape.com/help/Content/Plans/my_account_preferences.htm">账户偏好</a>。</p>
+<h2>2. 改善偏淡、缺少立体感的画面</h2>
+<p>对齐 SOLIDWORKS 普通“带边线上色”（不开 RealView）时，应先排除高光干扰。同一个 RGB 色号只是外观输入值，最终画面还受光照影响。光泽度控制高光集中程度，不是颜色饱和度。</p>
+<p>先记下当前参数，在 <strong>Graphics preferences → General</strong> 中进行一次对照：</p>
+<table><tr><th>设置</th><th>临时诊断值</th><th>确认后可试的起点</th></tr><tr><td>Shaded bodies → Line width</td><td>0.6 px</td><td>0.6 px</td></tr><tr><td>Ambient occlusion</td><td>0%，排除局部遮蔽</td><td>20–35%</td></tr><tr><td>Shininess</td><td>3%</td><td>3–8%</td></tr><tr><td>Specular color</td><td>#000000，暂时去除镜面高光</td><td>#333333 至 #555555，中性弱高光</td></tr></table>
+<p>以上是诊断步骤和试调起点，不是实测匹配后的 SW 预设。镜面反射颜色为黑色时，零件底色不会被改成黑色，只是不再叠加该项高光。</p>
+<p>保留原来的零件色号，先观察发白现象是否减轻，再逐项恢复高光和遮蔽。暂时不要用更深、更艳的零件色号补偿光照差异。右键零件 → <strong>Edit appearance</strong> 可核对色号和透明度；也应核对是否存在单独的面或特征外观。</p>
+<p><a href="color-guide.html"><strong>查看完整的零件颜色研究与交互示意 →</strong></a></p>
+<p>建模时可保留 <strong>Shaded</strong> 的边线；观察外形时可切到 <strong>Shaded without edges</strong>。透视视图可以改善空间观感，但不需要为画草图强制开启。</p>
+<p><strong>View in high quality</strong> 主要改善曲面细分和平滑度，不等于启用真实材质或光线追踪。</p>
+<p class="note">饱和度、立体感和真实材质是三件不同的事。若需要金属反射、环境光和照片级展示，可使用账户可用的 Render Studio；它是独立的渲染场景，不会替换 Part Studio 的建模视口。</p>
+<p>来源：<a href="https://cad.onshape.com/help/Content/View/graphics_preferences.htm">图形偏好</a>、<a href="https://cad.onshape.com/help/Content/PartStudio/customizing_appearances.htm">零件外观</a>、<a href="https://cad.onshape.com/help/Content/View/view_in_high_quality.htm">高质量显示</a>、<a href="https://cad.onshape.com/help/Content/render-studio.htm">Render Studio</a>。</p>
+<h2>3. 使用 Edge 多色图标扩展</h2>
+<p>已安装旧版时：进入 <code>edge://extensions</code>，找到原来的扩展卡片，点击刷新 / 重新加载按钮，再刷新 Onshape。更新后名称为“Onshape 多色图标”，版本为 0.4.2。无需同时安装两份。</p>
+<ol><li>首次安装时，在 Edge 地址栏输入 <code>edge://extensions</code>。</li><li>打开“开发人员模式”，点击“加载解压缩的扩展”。</li><li>选择本指南所在的文件夹，它应直接包含 <code>manifest.json</code>。</li><li>刷新 Onshape 文档页面，从浏览器扩展菜单打开“Onshape 多色图标”。</li></ol>
+<p><strong>蓝色强调图标中的面、点和方向提示；浅蓝 / 白灰表示主体、参照部分和留白；深色保留轮廓及基本符号。</strong>例如，拉伸图标中只有原本强调的实体部分变蓝，其他白色面和黑色线保持清楚。这些颜色不代表命令分组，也不代表模型约束状态。</p>
+<p>原生工具栏、命令菜单、特征树与装配树统一使用这套规则，不依赖少数命令名称的白名单。草图、实体、曲面、钣金、装配及同域嵌入页面中的标准 SVG 图标都使用同一识别方式。相等、平行等原本只有线条的符号保留其简洁形状，不添加虚构的色块。</p>
+<p>可分别控制工具栏和树的配色。新增“显示命令文字”独立开关，在图标旁显示命令名称；草图直线、矩形等绘图工具保持只有图标，尺寸与约束命令可以显示文字。两个开关都关闭时恢复原有显示；卸载后刷新页面即可完全移除。</p>
+<p class="note">当前版本使用实际 Onshape 图标库进行了本地 Edge 验证，分组命令分发使用本地模拟服务验证，未完成登录文档端到端测试。当前支持 cad.onshape.com；企业专属域名、不同域名的嵌入应用、独立画布绘制的命令图标不在本版验证范围内。第三方自定义特征图片保持原样。Onshape 将来改变图标结构时可能需要适配。</p>
+<p>原有红色警告、错误、确认颜色，以及已识别的禁用、选中和抑制状态保留原样。如发现状态显示异常，可关闭多色图标。</p>
+<p>扩展在本机保存显示开关与各分类上次使用的命令；不读取 Cookie，不自行上传数据，也不调用模型 REST API。点击分类菜单会执行对应的 Onshape 原生命令，建模操作仍由 Onshape 处理。请先关闭其他 Onshape 主题扩展进行比较，避免多套样式同时生效。</p>
+<p>来源：<a href="https://learn.microsoft.com/en-us/microsoft-edge/extensions/getting-started/extension-sideloading">Microsoft Edge 本地安装说明</a>。</p>
+<h2>4. 为什么不用 FeatureScript</h2>
+<p>FeatureScript 用于创建建模特征及其参数面板。官方文档说明，自定义特征图标也会按灰度显示；公开能力不包含整套工具栏主题、主视口光照或建模渲染器替换。因此，它不适合解决这次界面显示需求。</p>
+<p>来源：<a href="https://cad.onshape.com/FsDoc/uispec.html#icons">FeatureScript 图标说明</a>、<a href="https://onshape-public.github.io/docs/app-dev/extensions/">集成应用扩展能力</a>。</p>
+<h2>5. 现成的界面增强方案</h2>
+<p><a href="https://github.com/RileyDavidson-Evans/Rally-for-Onshape">Rally for Onshape</a> 提供浮动工具栏、主题及触控相关增强，可作为另一种界面方案试用。它的项目介绍没有证明能够提供 SOLIDWORKS 式真实建模视口，不能据此承诺线宽、彩色图标和材质问题都能一并解决。</p>
+<p class="muted">资料核对日期：2026-09-10。英文菜单名称用于帮助定位，中文名称可能随界面翻译变化。</p>
+<section><h2>紧凑功能分组</h2><p>开启“显示命令文字”和“按功能分组”。配合统一在“配合”菜单；拉伸、旋转、扫掠、放样、加厚在“实体生成”；曲线与曲面放在一起，平面等基准单独一组。</p><p>分类入口宽度固定，切换配合不改变入口名称。首次显示常用命令图标，例如实体生成显示拉伸、编辑显示圆角、配合显示紧固配合；之后显示各分类上次选用的命令图标，刷新后保留。窗口较窄时，分类区域可横向滚动，右侧搜索仍可使用。按 Esc 关闭菜单；关闭分组即可返回原生工具栏。</p></section></main></body></html>
