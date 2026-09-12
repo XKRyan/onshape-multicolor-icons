@@ -13,18 +13,19 @@
     if (!s?.activeToolbar || s.editing || s.isCommandSearchOpen) {catalog.clear();return {ready:false};}
     const disabled = s.getDisabledCommands?.() || {};
     const list = [], seen = new Set();catalog.clear();
-    const visit = node => {
+    const visit = (node,nativeOnly=false) => {
       if (!node || seen.has(node)) return;seen.add(node);
+      nativeOnly=nativeOnly||(node!==s.activeToolbar&&node.draggable===false);
       if (node.isVisibleToUser === false) return;
       if (node.command && !node.children?.length) {
         if (s.shouldShowTool && !s.shouldShowTool(node)) return;
         const key = String(node.key ?? node.id ?? node.command);
         const label = s.$i18next?.t?.(node.name) || node.name || node.command;
         catalog.set(key,node);
-        list.push({key,label:String(label),name:String(node.name||''),command:String(node.command),icon:typeof node.icon==='string'?node.icon:'',custom:!!(node.iconUri||node.img||node.iconInitials),disabled:s.toolbarEnabled===false||!!disabled[node.command]||!!node.disabled});
+        list.push({key,label:String(label),name:String(node.name||''),command:String(node.command),icon:typeof node.icon==='string'?node.icon:'',nativeOnly,custom:!!(node.iconUri||node.img||node.iconInitials),disabled:s.toolbarEnabled===false||!!disabled[node.command]||!!node.disabled});
       }
-      for (const child of node.children || []) visit(child);
-      if (node.addTool) visit(node.addTool);
+      for (const child of node.children || []) visit(child,nativeOnly);
+      if (node.addTool) visit(node.addTool,nativeOnly);
     };
     visit(s.activeToolbar);
     context = String(s.currentContext)+':'+String(s.currentElementId);

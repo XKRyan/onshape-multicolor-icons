@@ -6,6 +6,30 @@
   const historyPrefix='osvcGroupLastIcon_';
   const lastIcons={},historyChanged=new Set();
   let currentGroups=new Map();
+  let menuAnchor=null;
+  function keepNative(t){
+    return /undo|redo|update|refresh|rollback|撤销|撤回|重做|更新|刷新/i.test([t.command,t.icon,t.name,t.label].join(' ')) || t.nativeOnly;
+  }
+  function clearNativeMarks(){host?.querySelectorAll('.osvc-group-replaced').forEach(el=>el.classList.remove('osvc-group-replaced'));}
+  function takeOver(row,tools){
+    // History and contextual controls are not necessarily in activeToolbar.
+    // Hide only toolsets whose controls are all represented in our catalog.
+    const catalog=new Map(tools.map(t=>[t.command,t])),retained=new Set();
+    clearNativeMarks();
+    const sets=[...row.querySelectorAll('.toolset')].filter(el=>!el.parentElement.closest('.toolset'));
+    for(const set of sets){
+      const controls=[...set.querySelectorAll('.tool,button,[role="button"]')];
+      const commands=controls.map(el=>el.getAttribute('command-id'));
+      if(controls.length && commands.every(id=>id && catalog.has(id) && !keepNative(catalog.get(id))))set.classList.add('osvc-group-replaced');
+      else for(const id of commands)if(id)retained.add(id);
+    }
+    // Collapse separators/wrappers only when they contain no surviving controls.
+    for(const item of [...row.querySelectorAll('.toolbar-item')].reverse()){
+      if(item.querySelector('.osvc-group-replaced') && ![...item.querySelectorAll('.toolset,.tool,button,[role="button"]')].some(el=>!el.closest('.osvc-group-replaced')))item.classList.add('osvc-group-replaced');
+    }
+    for(const el of row.querySelectorAll('[command-id]'))if(!el.closest('.osvc-group-replaced'))retained.add(el.getAttribute('command-id'));
+    return tools.filter(t=>!keepNative(t)&&!retained.has(t.command));
+  }
   function category(t){
     const k=(t.icon+' '+t.command+' '+t.name+' '+t.label).toLowerCase();
     if(t.custom)return 'custom';
@@ -28,7 +52,8 @@
     return 'other';
   }
   const style=document.createElement('style');style.textContent=`
-    .osvc-group-host .toolset,.osvc-group-host .toolbar-item:has(.toolset):not(:has(.command-search-trigger)) {display:none!important;}
+    .osvc-group-host .osvc-group-replaced {display:none!important;}
+    .osvc-group-host .toolbar > :not(.osvc-group-bar) {flex-shrink:0;}
     html[data-osvc-grouped=true] #osToolbar,html[data-osvc-grouped=true] os-vue-custom-toolbar {min-width:0!important;max-width:100%!important;width:100%!important;}
     html[data-osvc-grouped=true] .os-toolbar-container,html[data-osvc-grouped=true] .os-grow:has(>os-vue-custom-toolbar) {min-width:0!important;}
     .osvc-group-host .toolbar {min-width:0!important;}
@@ -51,7 +76,7 @@
     for(const property of ['font-family','font-size','font-weight','font-style','line-height','letter-spacing'])target.style.setProperty(property,native.getPropertyValue(property));
   }
   function close(){menu?.remove();menu=null;activeButton?.setAttribute('aria-expanded','false');activeButton=null;}
-  function restore(){close();bar?.remove();bar=null;host?.classList.remove('osvc-group-host');host=null;signature='';root.removeAttribute('data-osvc-grouped');}
+  function restore(){close();bar?.remove();bar=null;clearNativeMarks();host?.classList.remove('osvc-group-host');host=null;signature='';root.removeAttribute('data-osvc-grouped');}
   function request(){if(!enabled)return;pending++;window.postMessage({type:'OSVC_TOOLBAR_REQUEST_V1',action:'catalog',enabled:true,requestId:pending},location.origin);}
   function icon(t){
     const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 20 20');svg.setAttribute('aria-hidden','true');
@@ -77,7 +102,7 @@
     if(activeButton===button){close();return;}close();activeButton=button;button.setAttribute('aria-expanded','true');
     menu=document.createElement('div');menu.className='osvc-group-menu';menu.setAttribute('role','menu');menu.dataset.drawing=String(drawing);
     for(const t of items){const item=document.createElement('button');item.type='button';item.setAttribute('role','menuitem');item.disabled=t.disabled;item.title=t.label;item.setAttribute('aria-label',t.label);item.append(icon(t));if(!drawing){const text=document.createElement('span');text.textContent=t.label;item.append(text);}item.onclick=()=>{const key=t.key;remember(button.dataset.group,t);close();window.postMessage({type:'OSVC_TOOLBAR_REQUEST_V1',action:'execute',key,context},location.origin);setTimeout(request,50);};menu.append(item);}
-    matchFont(menu,button);document.body.append(menu);const r=button.getBoundingClientRect();menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+3,innerHeight-menu.offsetHeight-8))+'px';
+    matchFont(menu,button);document.body.append(menu);const r=button.getBoundingClientRect();menuAnchor={x:r.x,y:r.y};menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+3,innerHeight-menu.offsetHeight-8))+'px';
     menu.querySelector('button:not(:disabled)')?.focus();
   }
   function render(data){
@@ -86,11 +111,14 @@
     // Only replace a recognized, populated native toolbar. Search stays in its original DOM.
     const row=target.querySelector('.toolbar'),source=row?.querySelector('.toolset');
     if(!row || !source){restore();return;}
-    const sig=JSON.stringify([data.context,data.tools]);if(signature===sig && bar?.isConnected && host===target){updateGroupIcons();return;}
-    close();if(host!==target){restore();host=target;}signature=sig;context=data.context;
-    const grouped=new Map(groups.map(([key])=>[key,[]]));for(const t of data.tools)grouped.get(category(t)).push(t);
+    if(host!==target){restore();host=target;}
+    const tools=takeOver(row,data.tools);
+    if(!tools.length){restore();return;}
+    const sig=JSON.stringify([data.context,tools]);if(signature===sig && bar?.isConnected){updateGroupIcons();return;}
+    close();signature=sig;context=data.context;
+    const grouped=new Map(groups.map(([key])=>[key,[]]));for(const t of tools)grouped.get(category(t)).push(t);
     currentGroups=grouped;
-    if(!bar){bar=document.createElement('div');bar.className='osvc-group-bar';bar.setAttribute('role','toolbar');bar.setAttribute('aria-label','命令分类');row.prepend(bar);}else bar.replaceChildren();
+    if(!bar){bar=document.createElement('div');bar.className='osvc-group-bar';bar.setAttribute('role','toolbar');bar.setAttribute('aria-label','命令分类');const search=[...row.children].find(el=>el.matches('.command-search-trigger')||el.querySelector('.command-search-trigger'));row.insertBefore(bar,search||null);}else bar.replaceChildren();
     for(const [key,label] of groups){const items=grouped.get(key);if(!items.length)continue;const b=document.createElement('button');b.type='button';b.className='osvc-group-button';b.dataset.group=key;const text=document.createElement('span');text.textContent=label+' ▾';b.append(text);b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-expanded','false');b.onclick=()=>open(b,items,key==='draw');bar.append(b);}
     matchFont(bar,source.querySelector('.tool-label')||source);
     updateGroupIcons();
@@ -99,7 +127,13 @@
   window.addEventListener('message',e=>{if(e.source!==window||e.data?.type!=='OSVC_TOOLBAR_RESPONSE_V1'||!enabled||e.data.requestId!==pending)return;lastResponse=Date.now();render(e.data);});
   document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!activeButton?.contains(e.target))close();},true);
   document.addEventListener('keydown',e=>{if(!menu)return;if(e.key==='Escape'){const b=activeButton;close();b?.focus();e.preventDefault();}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){const list=[...menu.querySelectorAll('button:not(:disabled)')];const i=list.indexOf(document.activeElement);list[(i+(e.key==='ArrowDown'?1:-1)+list.length)%list.length]?.focus();e.preventDefault();}});
-  window.addEventListener('resize',close);document.addEventListener('scroll',e=>{if(menu&&!menu.contains(e.target))close();},true);
+  window.addEventListener('resize',close);document.addEventListener('scroll',e=>{
+    if(menu&&!menu.contains(e.target)&&activeButton&&menuAnchor){
+      const r=activeButton.getBoundingClientRect();
+      // A queued scroll-into-view event must not close a newly opened menu.
+      if(Math.abs(r.x-menuAnchor.x)>1||Math.abs(r.y-menuAnchor.y)>1)close();
+    }
+  },true);
   function apply(value){settings=OSVC.settings(value);enabled=settings.labels&&settings.groups;if(enabled)request();else{restore();window.postMessage({type:'OSVC_TOOLBAR_REQUEST_V1',action:'catalog',enabled:false,requestId:++pending},location.origin);}}
   chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.osvcSettings){revision++;apply(changes.osvcSettings.newValue);}});
   chrome.storage.onChanged.addListener((changes,area)=>{
