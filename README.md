@@ -2,23 +2,24 @@
 
 让 Onshape 的命令更容易辨认：保留原生图标轮廓与留白，增加蓝色强调，并提供可选的命令文字和功能分组。
 
-适用于 Microsoft Edge 和 Google Chrome，当前版本 **0.4.4**。这是社区浏览器扩展，与 Onshape / PTC、SOLIDWORKS / Dassault Systèmes 无隶属关系。
+适用于 Microsoft Edge 和 Google Chrome，当前版本 **0.4.5**。这是社区浏览器扩展，与 Onshape / PTC、SOLIDWORKS / Dassault Systèmes 无隶属关系。
 
 ## 功能
 
 - 撤销、重做始终为独立按钮；装配体插入单独显示，更新参考零部件等操作保留在左侧。
-- 分类按钮左右分离：左侧执行上次使用的命令，右侧加宽箭头展开菜单。
+- 分类按钮左右分离：左侧执行上次使用的命令，右侧 24 像素箭头展开菜单。
 
 - 为原生 SVG 图标添加蓝白黑配色，保留轮廓、留白及已识别的状态颜色。
 - 分别开关工具栏、菜单及特征树的配色。
 - 可选显示命令文字；草图直线、矩形等绘图工具保持图标模式。
 - 可选紧凑功能分组：实体生成、编辑、配合、曲线与曲面、基准等。
 - 分类首次显示常用命令图标，之后记住该分类上次选用的命令图标。
-- 分类和菜单文字跟随 Onshape 原生字体样式；分类区域可横向滚动。
+- 分类和菜单文字跟随 Onshape 原生字体样式；短名称按钮自动收窄，长名称设宽度上限；空间不足时换行，搜索固定在右侧。
+- 图标强调色支持颜色选择器和十六进制色号输入，可恢复默认蓝色。
 
 ## 安装
 
-1. 在 [Releases](https://github.com/XKRyan/onshape-multicolor-icons/releases/latest) 下载 `onshape-multicolor-icons-v0.4.4.zip`，解压到一个长期保留的文件夹。
+1. 在 [Releases](https://github.com/XKRyan/onshape-multicolor-icons/releases/latest) 下载 `onshape-multicolor-icons-v0.4.5.zip`，解压到一个长期保留的文件夹。
 2. Edge 打开 `edge://extensions`；Chrome 打开 `chrome://extensions`。
 3. 开启 **开发人员模式 / 开发者模式**，点击 **加载解压缩的扩展程序**。
 4. 选择解压后直接包含 `manifest.json` 的文件夹，不要选择 ZIP 文件。
@@ -41,7 +42,7 @@
 
 ## 隐私与权限
 
-只申请 `storage` 权限，用于本机保存显示开关与各分类的最近命令。扩展脚本运行于上述 Onshape 域名，不含遥测、不读取 Cookie、不自行上传数据，也不调用模型 REST API。
+只申请 `storage` 权限，用于本机保存显示开关、强调色与各分类的最近命令。扩展脚本运行于上述 Onshape 域名，不含遥测、不读取 Cookie、不自行上传数据，也不调用模型 REST API。
 
 点击分类菜单会调用对应的 Onshape 原生命令；拉伸、删除等操作仍由 Onshape 按用户操作执行。扩展无需 API 密钥。
 

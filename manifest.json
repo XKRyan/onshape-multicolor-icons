@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Onshape 多色图标",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "保留 Onshape 原生图标轮廓和留白，为强调面与点添加蓝色。支持原生工具栏、菜单和特征树。",
   "permissions": ["storage"],
   "action": {

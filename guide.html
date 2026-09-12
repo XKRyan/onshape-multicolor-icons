@@ -23,7 +23,7 @@ body{font:16px/1.8 "Segoe UI","Microsoft YaHei",sans-serif;color:#253344;backgro
 <p class="note">饱和度、立体感和真实材质是三件不同的事。若需要金属反射、环境光和照片级展示，可使用账户可用的 Render Studio；它是独立的渲染场景，不会替换 Part Studio 的建模视口。</p>
 <p>来源：<a href="https://cad.onshape.com/help/Content/View/graphics_preferences.htm">图形偏好</a>、<a href="https://cad.onshape.com/help/Content/PartStudio/customizing_appearances.htm">零件外观</a>、<a href="https://cad.onshape.com/help/Content/View/view_in_high_quality.htm">高质量显示</a>、<a href="https://cad.onshape.com/help/Content/render-studio.htm">Render Studio</a>。</p>
 <h2>3. 使用 Edge 多色图标扩展</h2>
-<p>已安装旧版时：进入 <code>edge://extensions</code>，找到原来的扩展卡片，点击刷新 / 重新加载按钮，再刷新 Onshape。更新后名称为“Onshape 多色图标”，版本为 0.4.4。无需同时安装两份。</p>
+<p>已安装旧版时：进入 <code>edge://extensions</code>，找到原来的扩展卡片，点击刷新 / 重新加载按钮，再刷新 Onshape。更新后名称为“Onshape 多色图标”，版本为 0.4.5。无需同时安装两份。</p>
 <ol><li>首次安装时，在 Edge 地址栏输入 <code>edge://extensions</code>。</li><li>打开“开发人员模式”，点击“加载解压缩的扩展”。</li><li>选择本指南所在的文件夹，它应直接包含 <code>manifest.json</code>。</li><li>刷新 Onshape 文档页面，从浏览器扩展菜单打开“Onshape 多色图标”。</li></ol>
 <p><strong>蓝色强调图标中的面、点和方向提示；浅蓝 / 白灰表示主体、参照部分和留白；深色保留轮廓及基本符号。</strong>例如，拉伸图标中只有原本强调的实体部分变蓝，其他白色面和黑色线保持清楚。这些颜色不代表命令分组，也不代表模型约束状态。</p>
 <p>原生工具栏、命令菜单、特征树与装配树统一使用这套规则，不依赖少数命令名称的白名单。草图、实体、曲面、钣金、装配及同域嵌入页面中的标准 SVG 图标都使用同一识别方式。相等、平行等原本只有线条的符号保留其简洁形状，不添加虚构的色块。</p>
@@ -38,4 +38,4 @@ body{font:16px/1.8 "Segoe UI","Microsoft YaHei",sans-serif;color:#253344;backgro
 <h2>5. 现成的界面增强方案</h2>
 <p><a href="https://github.com/RileyDavidson-Evans/Rally-for-Onshape">Rally for Onshape</a> 提供浮动工具栏、主题及触控相关增强，可作为另一种界面方案试用。它的项目介绍没有证明能够提供 SOLIDWORKS 式真实建模视口，不能据此承诺线宽、彩色图标和材质问题都能一并解决。</p>
 <p class="muted">资料核对日期：2026-09-10。英文菜单名称用于帮助定位，中文名称可能随界面翻译变化。</p>
-<section><h2>紧凑功能分组</h2><p>开启“显示命令文字”和“按功能分组”。配合统一在“配合”菜单；拉伸、旋转、扫掠、放样、加厚在“实体生成”；曲线与曲面放在一起，平面等基准单独一组。</p><p>撤销、重做、更新参考零部件等原生操作保留在工具栏左侧，直接点击使用。分类入口左右分离：左侧显示并执行上次使用的命令，右侧加宽箭头展开分类菜单。撤销、重做始终为独立按钮，装配体的插入也单独显示。首次显示常用命令图标，例如实体生成显示拉伸、编辑显示圆角、配合显示紧固配合；之后显示各分类上次选用的命令图标，刷新后保留。窗口较窄时，分类区域可横向滚动，右侧搜索仍可使用。按 Esc 关闭菜单；关闭分组即可返回原生工具栏。</p></section></main></body></html>
+<section><h2>紧凑功能分组</h2><p>开启“显示命令文字”和“按功能分组”。配合统一在“配合”菜单；拉伸、旋转、扫掠、放样、加厚在“实体生成”；曲线与曲面放在一起，平面等基准单独一组。</p><p>撤销、重做、更新参考零部件等原生操作保留在工具栏左侧，直接点击使用。分类入口左右分离：左侧显示并执行上次使用的命令，右侧加宽箭头展开分类菜单。撤销、重做始终为独立按钮，装配体的插入也单独显示。首次显示常用命令图标，例如实体生成显示拉伸、编辑显示圆角、配合显示紧固配合；之后显示各分类上次选用的命令图标，刷新后保留。按钮随命令名称长短调整，长名称省略显示，悬停可查看完整名称。右侧箭头缩至 24 像素；搜索固定在右侧，空间不足时命令换行显示。按 Esc 关闭菜单；关闭分组即可返回原生工具栏。</p></section><section><h2>自定义图标强调色</h2><p>打开扩展面板，点击“图标强调色”选择颜色，或输入 # 加六位十六进制色号。浅色和阴影色会随之调整，黑色轮廓与白色留白保持不变。“恢复默认蓝色”可恢复原配色。设置会保存在当前浏览器，刷新后保留。</p></section></main></body></html>

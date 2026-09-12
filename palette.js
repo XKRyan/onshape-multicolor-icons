@@ -1,6 +1,6 @@
 /* Local overrides of Onshape's native SVG paint roles; no geometry replacement. */
 globalThis.OSVC = (() => {
-  const defaults = { enabled: true, toolbar: true, tree: true, labels: false, groups: true };
+  const defaults = { enabled: true, toolbar: true, tree: true, labels: false, groups: true, accent: '#216bc4' };
   const scopes = {
     toolbar: ".os-tool-command-icon, .os-element-toolbar, .os-mini-toolbar-panel, .os-toolbar, .os-toolbar-container, .os-vue-custom-toolbar, [role=toolbar], [role=menu], .os-context-menu",
     tree: ".feature-list-container, .plg-feature-list, .os-feature-type-icon, .os-tree-container"
@@ -36,13 +36,18 @@ globalThis.OSVC = (() => {
   };
   function settings(value = {}) {
     // v0.1 tint is retired; the three user-selected scope switches are retained.
-    return Object.fromEntries(Object.entries(defaults).map(([key, fallback]) => [key, typeof value?.[key] === "boolean" ? value[key] : fallback]));
+    return Object.fromEntries(Object.entries(defaults).map(([key, fallback]) => [key, key==='accent' ? (/^#[0-9a-f]{6}$/i.test(value?.accent||'')?value.accent.toLowerCase():fallback) : typeof value?.[key] === "boolean" ? value[key] : fallback]));
   }
-  function css() {
-    const declarations = Object.entries(paint).map(([key, value]) => `${key}: ${value} !important;`).join("\n");
+  function colors(value={}) {
+    const {accent}=settings(value);if(accent===defaults.accent)return {...paint};
+    const mix=(target,amount)=>'#'+[1,3,5].map(i=>Math.round(parseInt(accent.slice(i,i+2),16)*(1-amount)+target*amount).toString(16).padStart(2,'0')).join('');
+    return Object.fromEntries(Object.keys(paint).map(key=>[key,key.includes('fill-quaternary')?mix(255,.85):key.includes('fill-tertiary')?mix(0,.25):key.includes('fill-secondary')?mix(255,.38):key.includes('accent-secondary')?mix(255,.7):accent]));
+  }
+  function css(value={}) {
+    const declarations = Object.entries(colors(value)).map(([key, value]) => `${key}: ${value} !important;`).join("\n");
     return Object.entries(scopes).map(([scope, selector]) =>
       `html[data-osvc-enabled="true"][data-osvc-${scope}="true"] :is(${selector}) ${allIcons}${guard} {\n${declarations}\n}`
     ).join("\n");
   }
-  return { defaults, scopes, blocked, allIcons, paint, settings, css };
+  return { defaults, scopes, blocked, allIcons, paint, settings, colors, css };
 })();

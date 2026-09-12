@@ -1,12 +1,14 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onshape 多色图标</title><link rel="stylesheet" href="popup.css"></head>
 <body>
-<header><span class="brand" aria-hidden="true">◈</span><div><h1>Onshape 多色图标</h1><p>蓝色强调 · 清晰轮廓 · 保留留白</p></div></header>
+<header><span class="brand" aria-hidden="true">◈</span><div><h1>Onshape 多色图标</h1><p>自选强调色 · 清晰轮廓 · 保留留白</p></div></header>
 <main>
   <label class="master"><span>开启多色图标</span><input id="enabled" type="checkbox" role="switch"></label>
+  <label><span>图标强调色</span><input id="accent" type="color" aria-label="图标强调色"></label>
+  <div class="accent-controls"><input id="accentHex" type="text" maxlength="7" pattern="#[0-9A-Fa-f]{6}" aria-label="十六进制色号" placeholder="#216bc4"><button id="resetAccent" type="button">恢复默认蓝色</button></div>
   <label><span>显示命令文字</span><input id="labels" type="checkbox" role="switch"></label>
   <label><span>按功能分组（紧凑工具栏）</span><input id="groups" type="checkbox" role="switch"></label>
-  <p class="hint">分组开启时，从固定分类菜单选择命令；关闭分组时，名称显示在图标旁。草图直线、矩形等绘图工具保留图标，尺寸与约束显示文字。配色可独立开关。</p>
+  <p class="hint">分组开启时，点击左侧直接使用命令，点击右侧箭头选择其他命令；长名称省略显示，空间不足时换行。草图直线、矩形等绘图工具保留图标，尺寸与约束显示文字。配色可独立开关。</p>
   <div class="sample"><svg viewBox="0 0 20 20" aria-label="蓝白黑多色拉伸图标" role="img"><path d="M1 1v15l3 3h15V4l-3-3H1z" fill="#333"/><path fill-rule="evenodd" d="M2.3535 2l2.25 2.25H17.75L15.5 2H2.3536zM2 2.3535l2.25 2.25V17.75L2 15.5V2.3536zM4.75 18H9l-2-2V7h9l2 2V4.75H4.75V18z" fill="#fff"/><path fill-rule="evenodd" d="M9.7493 17.7493l-.021-7.6633L7.5 7.9557V15.5l2.2493 2.2493zM10 18h8v-7.75h-7.7713l.0213 7.7493L10 18zm7.75-8.25L15.5 7.5H7.7468l2.3535 2.25H17.75z" fill="#74afe2"/></svg><div><strong>拉伸</strong><p>强调面是蓝色，轮廓和留白保持清楚。</p></div></div>
   <fieldset><legend>显示位置</legend><label><span>工具栏与命令菜单</span><input id="toolbar" type="checkbox"></label><label><span>特征树与装配树</span><input id="tree" type="checkbox"></label></fieldset>
   <div class="semantics"><p><i style="--color:#74afe2"></i><span><b>蓝色</b>　强调面、点与方向提示</span></p><p><i style="--color:#d9e7f3"></i><span><b>浅蓝 / 白灰</b>　主体、参照部分与留白</span></p><p><i style="--color:#333"></i><span><b>深色</b>　轮廓及基本符号</span></p></div>
@@ -14,5 +16,5 @@
   <p id="status" role="status" aria-live="polite">正在检查当前页面…</p>
   <a class="guide" href="guide.html" target="_blank" rel="noopener">图标、草图与零件颜色指南 ↗</a>
   <p class="hint">分类图标默认使用常用命令；选用其他命令后显示其图标，并在刷新后保留。</p>
-  <p class="footnote">原生命令自动识别 · 自定义特征图标保持原样<br>0.4.4 · 仅改变本机界面显示</p>
+  <p class="footnote">原生命令自动识别 · 自定义特征图标保持原样<br>0.4.5 · 仅改变本机界面显示</p>
 </main><script src="palette.js"></script><script src="popup.js"></script></body></html>

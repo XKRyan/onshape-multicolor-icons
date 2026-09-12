@@ -12,8 +12,10 @@
 
   function apply(value) {
     current = config.settings(value);
+    const nextCSS=config.css(current);if(style.textContent!==nextCSS)style.textContent=nextCSS;
     root.removeAttribute("data-osvc-tint");
     for (const [key, enabled] of Object.entries(current)) {
+      if(typeof enabled!=='boolean')continue;
       if (current.enabled) root.setAttribute(`data-osvc-${key}`, String(enabled));
       else root.removeAttribute(`data-osvc-${key}`);
     }

@@ -6,9 +6,21 @@
   let saveQueue = Promise.resolve();
   function draw() {
     for (const [key, input] of Object.entries(controls)) {
-      input.checked = current[key];
+      if(key==='accent')input.value=current.accent;else input.checked = current[key];
       input.disabled = key === 'groups' ? !current.labels : key !== "enabled" && key !== "labels" && !current.enabled;
     }
+  }
+  function save(persist=true){
+    const snapshot={...current};draw();
+    document.getElementById('accentHex').value=current.accent;document.getElementById('accentHex').setCustomValidity('');
+    const colors=config.colors(current);
+    const sample=document.querySelector('.sample svg path:last-child');sample.setAttribute('fill',colors['--os-icon-fill-secondary']);
+    document.querySelector('.sample p').textContent='强调色用于面、点和方向，轮廓与留白保持清楚。';
+    document.querySelector('.sample svg').setAttribute('aria-label','多色拉伸图标');
+    const swatches=document.querySelectorAll('.semantics i');swatches[0].style.setProperty('--color',colors['--os-icon-fill-secondary']);swatches[1].style.setProperty('--color',colors['--os-icon-fill-quaternary']);
+    const names=document.querySelectorAll('.semantics b');names[0].textContent='强调色';names[1].textContent='浅色 / 白灰';
+    if(!persist){refreshStatus();return;}
+    saveQueue=saveQueue.then(()=>chrome.storage.local.set({osvcSettings:snapshot})).then(refreshStatus).catch(()=>{status.textContent='设置未能保存，请重试。';});
   }
   async function refreshStatus() {
     try {
@@ -36,12 +48,14 @@
     current = config.settings(result.osvcSettings);
     draw();
     Object.entries(controls).forEach(([key, input]) => input.addEventListener("change", () => {
-      current[key] = input.checked;
-      const snapshot = { ...current };
-      draw();
-      saveQueue = saveQueue.then(() => chrome.storage.local.set({ osvcSettings: snapshot }))
-        .then(refreshStatus).catch(() => { status.textContent = "设置未能保存。请重新打开扩展面板后再试。"; });
+      current[key] = key==='accent'?input.value:input.checked;
+      save();
     }));
-    refreshStatus();
+    document.getElementById('accentHex').addEventListener('change',e=>{
+      const value=e.target.value.trim();if(!/^#[0-9a-f]{6}$/i.test(value)){e.target.setCustomValidity('请输入 # 加六位十六进制色号');e.target.reportValidity();return;}
+      e.target.setCustomValidity('');current.accent=value.toLowerCase();save();
+    });
+    document.getElementById('resetAccent').onclick=()=>{document.getElementById('accentHex').setCustomValidity('');current.accent=config.defaults.accent;save();};
+    save(false);
   }).catch(() => { status.textContent = "无法读取设置。请重新打开扩展面板后再试。"; });
 })();

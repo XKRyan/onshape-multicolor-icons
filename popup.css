@@ -24,3 +24,5 @@ legend { color: #596a7c; font-size: 12px; margin-bottom: 2px; }
 .guide { display: block; color: #195fae; font-size: 13px; text-decoration: none; }
 .guide:hover { text-decoration: underline; }
 .footnote { font-size: 11px; color: #667487; margin: 16px 0 0; }
+
+.accent-controls{display:flex;gap:8px;align-items:center;margin:4px 0 12px}.accent-controls input{width:90px;padding:5px}.accent-controls button{padding:5px 8px;cursor:pointer}input[type=color]{width:40px;height:28px;border:0;padding:0;background:transparent;cursor:pointer}
