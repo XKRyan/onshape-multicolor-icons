@@ -28,8 +28,16 @@
       if (node.addTool) visit(node.addTool,nativeOnly);
     };
     visit(s.activeToolbar);
+    // HistoryToolset is generated outside activeToolbar and may collapse itself.
+    const history=[['UNDO_A_CHANGE','Undo','undo-button'],['REDO_A_CHANGE','Redo','redo-button']].map(([command,name,icon])=>{
+      const key='osvc-history-'+command;
+      catalog.set(key,{command});
+      return {key,command,label:s.$i18next?.t?.(name)||name,icon,disabled:s.toolbarEnabled===false||!!disabled[command]};
+    });
+    const insert=list.find(t=>t.icon==='assembly-insert-button'||/^(INSERT_ASSEMBLY|ASSEMBLY_INSERT|INSERT)$/.test(t.command));
+    if(insert)history.push({...insert,showLabel:true});
     context = String(s.currentContext)+':'+String(s.currentElementId);
-    return {ready:list.length>0,context,tools:list};
+    return {ready:list.length>0,context,tools:list,history};
   }
   window.addEventListener('message',event=>{
     if(event.source!==window || event.data?.type!==request)return;
@@ -44,7 +52,7 @@
       } else if(msg.action==='execute' && enabled && s && msg.context===context) {
         // Revalidate the current mode and availability at click time.
         const data=snapshot(s), tool=catalog.get(msg.key);
-        const current=data.tools?.find(t=>t.key===msg.key);
+        const current=[...(data.tools||[]),...(data.history||[])].find(t=>t.key===msg.key);
         if(!tool || !current || current.disabled || data.context!==msg.context)return;
         s.$rootScope.$evalAsync(()=>{
           if(s.toolbarEnabled===false || s.getDisabledCommands?.()[tool.command])return;

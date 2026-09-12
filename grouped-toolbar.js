@@ -7,8 +7,24 @@
   const lastIcons={},historyChanged=new Set();
   let currentGroups=new Map();
   let menuAnchor=null;
+  let historyBar=null;
+  function renderHistory(row,items){
+    if(!items?.length)return;
+    if(!historyBar){historyBar=document.createElement('div');historyBar.className='osvc-history-bar';row.prepend(historyBar);}
+    for(const t of items){
+      let b=historyBar.querySelector(`[data-history="${t.command}"]`);
+      if(!b){b=document.createElement('button');b.type='button';b.dataset.history=t.command;b.append(icon(t));if(t.showLabel){const label=document.createElement('span');label.textContent=t.label;b.append(label);b.classList.add('osvc-direct-insert');}b.onclick=()=>{if(!b.disabled)window.postMessage({type:'OSVC_TOOLBAR_REQUEST_V1',action:'execute',key:t.key,context},location.origin);};historyBar.append(b);}
+      b.title=t.label;b.setAttribute('aria-label',t.label);b.disabled=t.disabled;
+    }
+    for(const b of historyBar.querySelectorAll('button'))if(!items.some(t=>t.command===b.dataset.history))b.remove();
+    for(const set of row.querySelectorAll('.toolset')){
+      const commands=[...set.querySelectorAll('[command-id]')].map(el=>el.getAttribute('command-id'));
+      const hasHistory=commands.some(id=>items.some(t=>t.command===id))||set.querySelector('use[href*="undo-button"],use[href*="redo-button"]');
+      if(hasHistory&&commands.every(id=>id==='history-tools'||items.some(t=>t.command===id)))set.classList.add('osvc-group-replaced');
+    }
+  }
   function keepNative(t){
-    return /undo|redo|update|refresh|rollback|撤销|撤回|重做|更新|刷新/i.test([t.command,t.icon,t.name,t.label].join(' ')) || t.nativeOnly;
+    return /undo|redo|update|refresh|rollback|insert|撤销|撤回|重做|更新|刷新|插入/i.test([t.command,t.icon,t.name,t.label].join(' ')) || t.nativeOnly;
   }
   function clearNativeMarks(){host?.querySelectorAll('.osvc-group-replaced').forEach(el=>el.classList.remove('osvc-group-replaced'));}
   function takeOver(row,tools){
@@ -53,13 +69,26 @@
   }
   const style=document.createElement('style');style.textContent=`
     .osvc-group-host .osvc-group-replaced {display:none!important;}
+    .osvc-history-bar {display:flex;align-items:center;flex:0 0 auto;gap:2px;padding-right:5px;}
+    .osvc-history-bar button {display:flex;align-items:center;justify-content:center;width:30px;min-width:30px;height:30px;padding:4px;border:0;background:transparent;color:inherit;cursor:pointer;}
+    .osvc-history-bar button:hover:not(:disabled) {background:var(--os-icon-button-fill--hover-other,#dae6f0);}
+    .osvc-history-bar button:disabled {opacity:.35;cursor:default;}
+    .osvc-history-bar svg {width:20px;height:20px;}
+    .osvc-history-bar button.osvc-direct-insert {width:auto;gap:5px;font:inherit;white-space:nowrap;}
+    .osvc-history-bar .osvc-command-label {display:none!important;}
     .osvc-group-host .toolbar > :not(.osvc-group-bar) {flex-shrink:0;}
     html[data-osvc-grouped=true] #osToolbar,html[data-osvc-grouped=true] os-vue-custom-toolbar {min-width:0!important;max-width:100%!important;width:100%!important;}
     html[data-osvc-grouped=true] .os-toolbar-container,html[data-osvc-grouped=true] .os-grow:has(>os-vue-custom-toolbar) {min-width:0!important;}
     .osvc-group-host .toolbar {min-width:0!important;}
+    .osvc-group-host .toolbar .dropdown-arrow {min-width:32px;box-sizing:border-box;justify-content:center;}
     .osvc-group-host .command-search-trigger {flex-shrink:0!important;white-space:nowrap!important;}
     .osvc-group-bar {display:flex;align-items:center;gap:3px;min-width:0;max-width:100%;height:36px;flex:1 1 auto;overflow-x:auto;scrollbar-width:thin;box-sizing:border-box;}
-    .osvc-group-button {box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 6px;width:124px;min-width:124px;height:30px;border:0;border-radius:3px;background:var(--os-icon-button-fill--idle,#eee);color:var(--os-text-primary,#333);font:inherit;white-space:nowrap;cursor:pointer;}
+    .osvc-group-split {display:flex;flex:0 0 148px;width:148px;height:30px;}
+    .osvc-group-arrow {flex:0 0 32px;width:32px;height:30px;border:0;border-left:1px solid var(--os-outline-secondary,#ccc);border-radius:0 3px 3px 0;background:var(--os-icon-button-fill--idle,#eee);color:inherit;font:inherit;cursor:pointer;}
+    .osvc-group-arrow:hover,.osvc-group-arrow[aria-expanded=true] {background:var(--os-icon-button-fill--hover-other,#dae6f0);}
+    .osvc-group-button span {min-width:0;overflow:hidden;text-overflow:ellipsis;}
+    .osvc-group-button:disabled {opacity:.4;cursor:default;}
+    .osvc-group-button {box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 6px;width:116px;min-width:116px;height:30px;border:0;border-radius:3px;background:var(--os-icon-button-fill--idle,#eee);color:var(--os-text-primary,#333);font:inherit;white-space:nowrap;cursor:pointer;}
     .osvc-group-button > svg {width:20px;height:20px;flex:0 0 20px;pointer-events:none;}
     .osvc-group-button:hover,.osvc-group-button[aria-expanded=true] {background:var(--os-icon-button-fill--hover-other,#dae6f0);}
     .osvc-group-menu {position:fixed;z-index:2147483000;min-width:195px;max-width:300px;max-height:min(460px,75vh);overflow:auto;padding:5px;background:var(--os-background-primary,#fff);color:var(--os-text-primary,#333);border:1px solid var(--os-outline-secondary,#aaa);border-radius:5px;box-shadow:0 4px 18px #0003;font:inherit;}
@@ -76,7 +105,7 @@
     for(const property of ['font-family','font-size','font-weight','font-style','line-height','letter-spacing'])target.style.setProperty(property,native.getPropertyValue(property));
   }
   function close(){menu?.remove();menu=null;activeButton?.setAttribute('aria-expanded','false');activeButton=null;}
-  function restore(){close();bar?.remove();bar=null;clearNativeMarks();host?.classList.remove('osvc-group-host');host=null;signature='';root.removeAttribute('data-osvc-grouped');}
+  function restore(){close();bar?.remove();bar=null;historyBar?.remove();historyBar=null;clearNativeMarks();host?.classList.remove('osvc-group-host');host=null;signature='';root.removeAttribute('data-osvc-grouped');}
   function request(){if(!enabled)return;pending++;window.postMessage({type:'OSVC_TOOLBAR_REQUEST_V1',action:'catalog',enabled:true,requestId:pending},location.origin);}
   function icon(t){
     const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 20 20');svg.setAttribute('aria-hidden','true');
@@ -86,11 +115,16 @@
   function updateGroupIcons(){
     bar?.querySelectorAll('.osvc-group-button').forEach(button=>{
       const group=button.dataset.group,items=currentGroups.get(group)||[],saved=lastIcons[group];
-      const recent=items.find(t=>t.command===saved?.command && availableIcon(t.icon));
-      const selected=recent?.icon || (availableIcon(defaultIcons[group])?defaultIcons[group]:items.find(t=>availableIcon(t.icon))?.icon) || 'menu-button';
+      const recent=items.find(t=>t.command===saved?.command);
+      const command=recent||items.find(t=>t.icon===defaultIcons[group])||items[0];
+      button.disabled=!command||command.disabled;
+      button.onclick=()=>{if(!command||button.disabled)return;remember(group,command);close();window.postMessage({type:'OSVC_TOOLBAR_REQUEST_V1',action:'execute',key:command.key,context},location.origin);setTimeout(request,50);};
+      button.querySelector('span').textContent=command?.label||groups.find(([key])=>key===group)[1];
+      button.setAttribute('aria-label',command?.label||group);
+      const selected=availableIcon(command?.icon)?command.icon:'menu-button';
       const use=button.querySelector('svg use');
       if(use?.getAttribute('href')!=='#svg-icon-'+selected){const picture=icon({icon:selected});button.querySelector(':scope > svg')?.remove();button.prepend(picture);}
-      button.title=recent?`${groups.find(([key])=>key===group)[1]} · 上次使用：${recent.label}`:groups.find(([key])=>key===group)[1];
+      button.title=`${groups.find(([key])=>key===group)[1]} · ${command?.label||''}`;
     });
   }
   function remember(group,tool){
@@ -113,13 +147,20 @@
     if(!row || !source){restore();return;}
     if(host!==target){restore();host=target;}
     const tools=takeOver(row,data.tools);
+    renderHistory(row,data.history);
     if(!tools.length){restore();return;}
     const sig=JSON.stringify([data.context,tools]);if(signature===sig && bar?.isConnected){updateGroupIcons();return;}
     close();signature=sig;context=data.context;
     const grouped=new Map(groups.map(([key])=>[key,[]]));for(const t of tools)grouped.get(category(t)).push(t);
     currentGroups=grouped;
     if(!bar){bar=document.createElement('div');bar.className='osvc-group-bar';bar.setAttribute('role','toolbar');bar.setAttribute('aria-label','命令分类');const search=[...row.children].find(el=>el.matches('.command-search-trigger')||el.querySelector('.command-search-trigger'));row.insertBefore(bar,search||null);}else bar.replaceChildren();
-    for(const [key,label] of groups){const items=grouped.get(key);if(!items.length)continue;const b=document.createElement('button');b.type='button';b.className='osvc-group-button';b.dataset.group=key;const text=document.createElement('span');text.textContent=label+' ▾';b.append(text);b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-expanded','false');b.onclick=()=>open(b,items,key==='draw');bar.append(b);}
+    for(const [key,label] of groups){
+      const items=grouped.get(key);if(!items.length)continue;
+      const split=document.createElement('div');split.className='osvc-group-split';split.dataset.group=key;
+      const b=document.createElement('button');b.type='button';b.className='osvc-group-button';b.dataset.group=key;b.append(document.createElement('span'));
+      const arrow=document.createElement('button');arrow.type='button';arrow.className='osvc-group-arrow';arrow.dataset.group=key;arrow.textContent='▾';arrow.title=label;arrow.setAttribute('aria-label',label+' ▾');arrow.setAttribute('aria-haspopup','menu');arrow.setAttribute('aria-expanded','false');arrow.onclick=()=>open(arrow,items,key==='draw');
+      split.append(b,arrow);bar.append(split);
+    }
     matchFont(bar,source.querySelector('.tool-label')||source);
     updateGroupIcons();
     host.classList.add('osvc-group-host');root.setAttribute('data-osvc-grouped','true');
