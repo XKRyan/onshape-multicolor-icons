@@ -127,7 +127,15 @@
     for(const property of ['font-family','font-size','font-weight','font-style','line-height','letter-spacing'])target.style.setProperty(property,native.getPropertyValue(property));
   }
   function close(){menu?.remove();menu=null;activeButton?.setAttribute('aria-expanded','false');activeButton=null;}
-  function restore(){close();bar?.remove();bar=null;historyBar?.remove();historyBar=null;layoutObserver.disconnect();searchSlot?.classList.remove('osvc-search-slot');layoutRow?.classList.remove('osvc-toolbar-row');layoutRow?.style.removeProperty('--osvc-search-space');host?.querySelectorAll('.osvc-native-section').forEach(el=>el.classList.remove('osvc-native-section'));layoutRow=null;searchSlot=null;clearNativeMarks();host?.classList.remove('osvc-group-host');host=null;signature='';root.removeAttribute('data-osvc-grouped');}
+  function restore(){
+    close();bar?.remove();bar=null;historyBar?.remove();historyBar=null;layoutObserver.disconnect();
+    searchSlot?.classList.remove('osvc-search-slot');layoutRow?.classList.remove('osvc-toolbar-row');layoutRow?.style.removeProperty('--osvc-search-space');
+    // Mode changes can replace/reuse DOM nodes. Clean up every extension marker,
+    // not just the last toolbar object retained by this script.
+    document.querySelectorAll('.osvc-group-bar,.osvc-group-menu,.osvc-history-bar').forEach(el=>el.remove());
+    for(const name of ['osvc-group-replaced','osvc-native-section','osvc-search-slot','osvc-toolbar-row','osvc-group-host'])document.querySelectorAll('.'+name).forEach(el=>{el.classList.remove(name);if(name==='osvc-toolbar-row')el.style.removeProperty('--osvc-search-space');});
+    layoutRow=null;searchSlot=null;host=null;signature='';root.removeAttribute('data-osvc-grouped');
+  }
   function request(){if(!enabled)return;pending++;window.postMessage({type:'OSVC_TOOLBAR_REQUEST_V1',action:'catalog',enabled:true,requestId:pending},location.origin);}
   function icon(t){
     const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 20 20');svg.setAttribute('aria-hidden','true');
@@ -209,6 +217,6 @@
     for(const [key] of groups)if(!historyChanged.has(key))lastIcons[key]=values[historyPrefix+key];
     updateGroupIcons();
   }).catch(()=>{});
-  const initial=revision;chrome.storage.local.get('osvcSettings').then(r=>{if(initial===revision)apply(r.osvcSettings);});
+  const initial=revision;chrome.storage.local.get('osvcSettings').then(r=>{if(initial===revision)apply(r.osvcSettings);}).catch(()=>apply({groups:false}));
   setInterval(()=>{if(!enabled)return;if(lastResponse&&Date.now()-lastResponse>3500)restore();request();},750);
 })();

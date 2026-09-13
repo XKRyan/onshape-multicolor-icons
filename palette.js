@@ -1,6 +1,6 @@
 /* Local overrides of Onshape's native SVG paint roles; no geometry replacement. */
 globalThis.OSVC = (() => {
-  const defaults = { enabled: true, toolbar: true, tree: true, labels: false, groups: true, accent: '#216bc4' };
+  const defaults = { enabled: true, toolbar: true, tree: true, labels: false, groups: false, accent: '#216bc4' };
   const scopes = {
     toolbar: ".os-tool-command-icon, .os-element-toolbar, .os-mini-toolbar-panel, .os-toolbar, .os-toolbar-container, .os-vue-custom-toolbar, [role=toolbar], [role=menu], .os-context-menu",
     tree: ".feature-list-container, .plg-feature-list, .os-feature-type-icon, .os-tree-container"
@@ -36,7 +36,11 @@ globalThis.OSVC = (() => {
   };
   function settings(value = {}) {
     // v0.1 tint is retired; the three user-selected scope switches are retained.
-    return Object.fromEntries(Object.entries(defaults).map(([key, fallback]) => [key, key==='accent' ? (/^#[0-9a-f]{6}$/i.test(value?.accent||'')?value.accent.toLowerCase():fallback) : typeof value?.[key] === "boolean" ? value[key] : fallback]));
+    const result=Object.fromEntries(Object.entries(defaults).map(([key, fallback]) => [key, key==='accent' ? (/^#[0-9a-f]{6}$/i.test(value?.accent||'')?value.accent.toLowerCase():fallback) : typeof value?.[key] === "boolean" ? value[key] : fallback]));
+    // Older releases enabled grouping implicitly. Require a new explicit opt-in.
+    result.groupingOptIn=value?.groupingOptIn===true;
+    result.groups=result.groups&&result.groupingOptIn;
+    return result;
   }
   function colors(value={}) {
     const {accent}=settings(value);if(accent===defaults.accent)return {...paint};

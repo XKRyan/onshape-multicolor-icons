@@ -30,6 +30,7 @@
       if (current.labels) {
         status.textContent = !reply.version || reply.version !== chrome.runtime.getManifest().version
           ? "页面还在运行旧版，请刷新 Onshape 文档。"
+          : !current.groups ? reply.grouped ? "分组已关闭，页面尚未恢复；请刷新 Onshape。" : "功能分组已关闭，使用 Onshape 原生工具栏；命令文字保持开启。"
           : reply.grouped ? "功能分组已生效。命令按类别收起，搜索保留在右侧。"
           : current.groups ? "功能分组暂未接通，已保留原生工具栏。请确认已刷新 Onshape 文档。"
           : reply.labels > 0 ? `命令文字已开启，主页面显示 ${reply.labels} 个名称。`
@@ -49,6 +50,7 @@
     draw();
     Object.entries(controls).forEach(([key, input]) => input.addEventListener("change", () => {
       current[key] = key==='accent'?input.value:input.checked;
+      if(key==='groups')current.groupingOptIn=input.checked;
       save();
     }));
     document.getElementById('accentHex').addEventListener('change',e=>{
