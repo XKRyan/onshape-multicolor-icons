@@ -36,7 +36,7 @@
     };
     hook={owner,original,wrapper,descriptor:Object.getOwnPropertyDescriptor(owner,'appendDistanceMeasurements'),loading:false};owner.appendDistanceMeasurements=wrapper;
     const state=hook;
-    state.subscription=controller.model.getMeasurementChangedObservable?.().subscribe(e=>{state.loading=!!e.isLoading||e.hasSelections===false;});
+    state.subscription=controller.model.getMeasurementChangedObservable?.().subscribe(e=>{state.loading=!!e.isLoading;state.hasSelections=e.hasSelections;});
     // Already-created items have no public endpoint field. Refresh once using
     // the native read-only measurement request, including when opening mid-use.
     controller.updateMeasurements?.();
@@ -93,8 +93,11 @@
       if(!attach(controller)){release();send({ready:false,reason:'unsupported'});return;}
       const items=controller.model.measurementsForDisplay||[];
       // Respect the user's native measurement-type filter.
-      const filter=dialog.querySelector('.measurement-type-selector')?.value;
-      const eligible=hook.loading?[]:items.filter(i=>endpoints.has(i)&&(!filter || filter==='null' || String(i.type)===filter));
+      // Match native MeasureDialog's parseInt semantics. Vue removes the value
+      // attribute for Show all's null value, so option.value can be localized
+      // text (e.g. 全部显示), not an empty string or the literal "null".
+      const filter=Number.parseInt(dialog.querySelector('.measurement-type-selector')?.value,10);
+      const eligible=hook.loading||hook.hasSelections===false?[]:items.filter(i=>endpoints.has(i)&&(Number.isNaN(filter) || i.type===filter));
       const entries=eligible.map(item=>{
         const d=endpoints.get(item);
         const key=String(item.type)+':'+String(item.name);
@@ -104,7 +107,7 @@
       const selected=chosen?endpoints.get(chosen):null;
       const projection=selected?project(selected,controller.viewer):null;
       const basis=controller.newOrigin?'custom':'global';
-      send({ready:true,entries,key:chosen?String(chosen.type)+':'+String(chosen.name):'',basis,projected:!!projection,...projection});
+      send({ready:true,entries,key:chosen?String(chosen.type)+':'+String(chosen.name):'',basis,loading:hook.loading,hasNativeResults:hook.hasSelections!==false&&items.length>0,projected:!!projection,...projection});
     } catch {release();send({ready:false,reason:'unsupported'});}
   });
   window.addEventListener('pagehide',release);

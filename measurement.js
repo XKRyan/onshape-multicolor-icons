@@ -39,7 +39,7 @@
     const dialog=document.querySelector('.measure-details');
     if(!dialog?.getClientRects().length){cleanup();return;}
     const bounds=dialog.getBoundingClientRect();
-    const signature=JSON.stringify([data.ready,data.entries,data.key,data.basis,data.projected,data.points,data.rect,[bounds.left,bounds.top,bounds.width,bounds.height]]);
+    const signature=JSON.stringify([data.ready,data.entries,data.key,data.basis,data.loading,data.hasNativeResults,data.projected,data.points,data.rect,[bounds.left,bounds.top,bounds.width,bounds.height]]);
     if(signature===renderSignature && panel?.isConnected && dialog.contains(panel) && svg?.isConnected)return;
     renderSignature=signature;
     document.documentElement.removeAttribute('data-osvc-measuring');
@@ -52,7 +52,7 @@
     const values=panel.querySelector('.osvc-measure-values');values.replaceChildren();
     if(selected){for(const item of [{axis:'distance',value:selected.value,unit:selected.unit},...(selected.axes||[])]){const span=document.createElement('span');span.className='osvc-measure-value';span.style.color=colors[item.axis];span.textContent=`${item.axis==='distance'?'距离':'Δ'+item.axis} ${item.value} ${item.unit}`;values.append(span);}}
     const basis=data.basis==='custom'?'所选配合连接器坐标系':'全局坐标系';
-    panel.querySelector('.osvc-measure-note').textContent=!data.ready?'当前无法显示视图标注，原生测量仍可使用。':!selected?'选择两个图元以显示距离标注；其他测量见下方原生结果。':!data.projected?`${basis} · 端点暂不可定位，已保留数值。`:`${basis} · 红 X / 绿 Y / 蓝 Z；正负号沿坐标轴，方向随视角变化。`;
+    panel.querySelector('.osvc-measure-note').textContent=!data.ready?'当前无法显示视图标注，原生测量仍可使用。':data.loading?'正在更新测量…':!selected?data.hasNativeResults?'当前没有可用的距离标注；原生测量结果见下方。':'选择两个图元以显示距离标注；其他测量见下方原生结果。':!data.projected?`${basis} · 端点暂不可定位，已保留数值。`:`${basis} · 红 X / 绿 Y / 蓝 Z；正负号沿坐标轴，方向随视角变化。`;
     svg.replaceChildren();
     if(!selected || !data.projected || !validProjection(data))return;
     document.documentElement.setAttribute('data-osvc-measuring','true');

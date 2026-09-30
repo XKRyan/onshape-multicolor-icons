@@ -2,7 +2,7 @@
 
 让 Onshape 的命令更容易辨认：保留原生图标轮廓与留白，增加蓝色强调，并提供可选的命令文字、功能分组和视图测量标注。
 
-适用于 Microsoft Edge 和 Google Chrome，当前版本 **0.5.0**。这是社区浏览器扩展，与 Onshape / PTC、SOLIDWORKS / Dassault Systèmes 无隶属关系。
+适用于 Microsoft Edge 和 Google Chrome，当前版本 **0.5.1**。这是社区浏览器扩展，与 Onshape / PTC、SOLIDWORKS / Dassault Systèmes 无隶属关系。
 
 ## 功能
 
@@ -20,7 +20,7 @@
 
 ## 安装
 
-1. 在 [Releases](https://github.com/XKRyan/onshape-multicolor-icons/releases/latest) 下载 `onshape-multicolor-icons-v0.5.0.zip`，解压到一个长期保留的文件夹。
+1. 在 [Releases](https://github.com/XKRyan/onshape-multicolor-icons/releases/latest) 下载 `onshape-multicolor-icons-v0.5.1.zip`，解压到一个长期保留的文件夹。
 2. Edge 打开 `edge://extensions`；Chrome 打开 `chrome://extensions`。
 3. 开启 **开发人员模式 / 开发者模式**，点击 **加载解压缩的扩展程序**。
 4. 选择解压后直接包含 `manifest.json` 的文件夹，不要选择 ZIP 文件。
@@ -32,6 +32,8 @@
 更新时，用新版文件替换原安装文件夹的内容，在扩展管理页面点击重新加载，再刷新 Onshape。关闭分组会恢复原生工具栏；卸载扩展后刷新页面即可恢复原显示。
 
 ## 测量标注
+
+0.5.1 修复了原生测量选择“全部显示”时，视图标注下拉框为空的问题；中文和英文界面均支持。加载测量时显示更新提示，已有原生结果时不再误提示重新选择两个图元。
 
 1. 在扩展面板开启 **视图测量标注（距离与 XYZ）**。配色和功能分组可以关闭。
 2. 在 Onshape 中选择两个图元，打开右下角的测量工具，或使用快捷键 `[`。
