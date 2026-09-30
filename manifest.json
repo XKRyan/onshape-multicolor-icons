@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Onshape 多色图标",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Onshape 多色图标、可选命令文字与分组，以及视图中的距离和红绿蓝 XYZ 测量标注。",
   "permissions": ["storage"],
   "action": {
@@ -10,7 +10,7 @@
   },
   "content_scripts": [{
     "matches": ["https://cad.onshape.com/*"],
-    "js": ["palette.js", "content.js", "command-labels.js", "grouped-toolbar.js", "measurement.js"],
+    "js": ["palette.js", "content.js", "command-labels.js", "grouped-toolbar.js", "measurement-layout.js", "measurement.js"],
     "run_at": "document_idle",
     "all_frames": true
   }, {
