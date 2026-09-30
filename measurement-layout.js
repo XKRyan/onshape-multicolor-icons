@@ -13,42 +13,71 @@ globalThis.OSVCMeasureLayout=(()=>{
     }
     return true;
   }
-  function place(labels,points,viewport,dialog,preferred='right'){
+  const directions=['top','right','bottom','left'];
+  const defaults={distance:'top',X:'right',Y:'bottom',Z:'left'};
+  const assignments=[];
+  function permute(prefix,remaining){
+    if(!remaining.length){assignments.push(prefix);return;}
+    for(const side of remaining)permute([...prefix,side],remaining.filter(s=>s!==side));
+  }
+  permute([],directions);
+  function place(labels,points,viewport,dialog,preferred={}){
     const left=Math.max(8,viewport.left+8),right=Math.min(innerWidth-8,viewport.right-8);
     const top=Math.max(8,viewport.top+8),bottom=Math.min(innerHeight-8,viewport.bottom-8);
     const segments=[[points[0],points[3]],[points[0],points[1]],[points[1],points[2]],[points[2],points[3]]];
     const obstacles=[{x:dialog.left-8,y:dialog.top-8,w:dialog.width+16,h:dialog.height+16},...points.map(p=>({x:p[0]+2,y:p[1]-21,w:24,h:22}))];
     const bounds={left:Math.min(...points.map(p=>p[0])),right:Math.max(...points.map(p=>p[0])),top:Math.min(...points.map(p=>p[1])),bottom:Math.max(...points.map(p=>p[1]))};
-    const width=Math.max(...labels.map(l=>l.w)),height=labels.reduce((n,l)=>n+l.h,0)+(labels.length-1)*10,gap=42;
+    const gap=30;
     const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
     const safe=(r,used=[])=>r.x>=left&&r.y>=top&&r.x+r.w<=right&&r.y+r.h<=bottom&&!obstacles.some(o=>overlap(r,o))&&!used.some(o=>overlap({x:r.x-5,y:r.y-5,w:r.w+10,h:r.h+10},o))&&!segments.some(([a,b])=>hitsLine(r,a,b));
-    function column(side){
-      let x,y;
-      if(side==='left'||side==='right'){
-        x=side==='left'?bounds.left-gap-width:bounds.right+gap;
-        y=clamp((bounds.top+bounds.bottom-height)/2,top,bottom-height);
-      }else{
-        x=clamp((bounds.left+bounds.right-width)/2,left,right-width);
-        y=side==='top'?bounds.top-gap-height:bounds.bottom+gap;
-      }
+    const mids=labels.map(l=>[(l.a[0]+l.b[0])/2,(l.a[1]+l.b[1])/2]);
+    const near=(r,mid)=>(clamp(mid[0],r.x,r.x+r.w)-mid[0])**2+(clamp(mid[1],r.y,r.y+r.h)-mid[1])**2;
+    function outside(label,mid,side,shift=0){
+      let x=clamp(mid[0]-label.w/2,left,right-label.w),y=clamp(mid[1]-label.h/2,top,bottom-label.h);
+      if(side==='top'||side==='bottom'){x=clamp(x+shift,left,right-label.w);y=side==='top'?bounds.top-gap-label.h:bounds.bottom+gap;}
+      else{y=clamp(y+shift,top,bottom-label.h);x=side==='left'?bounds.left-gap-label.w:bounds.right+gap;}
+      return {x,y,w:label.w,h:label.h};
+    }
+    const candidates=labels.map((label,i)=>directions.map(side=>outside(label,mids[i],side)));
+    function fit(sides){
+      if(sides.some(s=>!directions.includes(s))||new Set(sides).size!==labels.length)return null;
       const rows=[];
-      for(const label of labels){const r={x:x+(side==='left'?width-label.w:0),y,w:label.w,h:label.h};if(!safe(r,rows))return null;rows.push(r);y+=label.h+10;}
-      return {side,rows};
+      for(let i=0;i<labels.length;i++){const row=candidates[i][directions.indexOf(sides[i])];if(!safe(row,rows))return null;rows.push(row);}
+      return rows;
     }
-    for(const side of [...new Set([preferred,'right','left','top','bottom'])]){const c=column(side);if(c)return c;}
-    // If a column cannot fit, search individual free locations. Never force a
-    // clamped label onto a line; its value remains in the native measure panel.
-    const rows=[];
-    for(const label of labels){
-      const mid=[(label.a[0]+label.b[0])/2,(label.a[1]+label.b[1])/2];
-      const used=rows.filter(Boolean);let best=null,bestScore=Infinity;
-      for(let y=top;y+label.h<=bottom;y+=34)for(let x=left;x+label.w<=right;x+=32){
-        const r={x,y,w:label.w,h:label.h},score=(x+label.w/2-mid[0])**2+(y+label.h/2-mid[1])**2;
-        if(score<bestScore&&safe(r,used)){best=r;bestScore=score;}
+    const previous=labels.map(l=>preferred[l.kind]),prior=fit(previous);
+    if(prior)return {rows:prior,sides:preferred};
+    // Only 24 assignments: keep one box on each side and choose short leaders.
+    // Preserve a valid assignment while rotating to avoid arbitrary switching.
+    let best=null,bestScore=Infinity,bestSides=null;
+    for(const assignment of assignments){
+      const sides=assignment.slice(0,labels.length),rows=fit(sides);if(!rows)continue;
+      const score=rows.reduce((n,r,i)=>n+near(r,mids[i])+(sides[i]===defaults[labels[i].kind]?0:10),0);
+      if(score<bestScore){best=rows;bestScore=score;bestSides=sides;}
+    }
+    const state=sides=>Object.fromEntries(labels.map((l,i)=>[l.kind,sides[i]]));
+    if(best)return {rows:best,sides:state(bestSides)};
+    // Near viewport edges, use a bounded set of local positions instead of
+    // scanning every screen pixel. Keep boxes clear even when a side is blocked.
+    const rows=[],sides=[],used=[];
+    for(let i=0;i<labels.length;i++){
+      const label=labels[i],mid=mids[i];let chosen=null,chosenSide=null,score=Infinity;
+      function consider(r,side){
+        const cost=near(r,mid)+(sides.includes(side)?100000:0)+(side===defaults[label.kind]?0:10);
+        if(cost<score&&safe(r,used)){chosen=r;chosenSide=side;score=cost;}
       }
-      rows.push(best);
+      for(const side of directions){
+        for(const shift of [0,-36,36,-72,72])consider(outside(label,mid,side,shift),side);
+        for(const offset of [30,60,100,160])for(const shift of [0,-40,40,-80,80]){
+          const vertical=side==='top'||side==='bottom';
+          const x=vertical?mid[0]-label.w/2+shift:side==='left'?mid[0]-offset-label.w:mid[0]+offset;
+          const y=vertical?(side==='top'?mid[1]-offset-label.h:mid[1]+offset):mid[1]-label.h/2+shift;
+          consider({x,y,w:label.w,h:label.h},side);
+        }
+      }
+      rows.push(chosen);sides.push(chosenSide);if(chosen)used.push(chosen);
     }
-    return {side:preferred,rows};
+    return {rows,sides:state(sides)};
   }
   return {place};
 })();

@@ -3,7 +3,7 @@
   const config=globalThis.OSVC,request='OSVC_MEASURE_REQUEST_V1',response='OSVC_MEASURE_RESPONSE_V1';
   const ns='http://www.w3.org/2000/svg';
   let enabled=false,revision=0,serial=0,pending=0,key='',panel=null,svg=null,lastReply=0,requested=false,renderSignature='',panelSignature='',sentKey='',lastStamp=-1;
-  let graph=null,layoutSide='right',layoutKey='';
+  let graph=null,layoutSides={},layoutKey='';
   const annotations=new Map(),widths=new Map();
   const colors={distance:'#333b44',X:'#c73232',Y:'#217a36',Z:'#2461ce'};
   const style=document.createElement('style');style.id='osvc-measure-style';
@@ -87,8 +87,8 @@
       spec.w=widths.get(widthKey);spec.h=26;
       attrs(n.path,{d:`M ${spec.a[0]} ${spec.a[1]} L ${spec.b[0]} ${spec.b[1]}`});
     }
-    if(layoutKey!==data.key){layoutKey=data.key;layoutSide='right';}
-    const layout=globalThis.OSVCMeasureLayout.place(specs,p,r,bounds,layoutSide);layoutSide=layout.side;
+    if(layoutKey!==staticSignature){layoutKey=staticSignature;layoutSides={};}
+    const layout=globalThis.OSVCMeasureLayout.place(specs,p,r,bounds,layoutSides);layoutSides=layout.sides;
     specs.forEach((spec,i)=>{
       const n=annotations.get(spec.kind),box=layout.rows[i];
       attrs(n.label,{display:box?'inline':'none'});attrs(n.leader,{display:box?'inline':'none'});if(!box)return;

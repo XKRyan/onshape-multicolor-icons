@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Onshape 多色图标",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Onshape 多色图标、可选命令文字与分组，以及视图中的距离和红绿蓝 XYZ 测量标注。",
   "permissions": ["storage"],
   "action": {
