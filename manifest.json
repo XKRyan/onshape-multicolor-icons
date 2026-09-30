@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Onshape 多色图标",
-  "version": "0.4.6",
-  "description": "保留 Onshape 原生图标轮廓和留白，为强调面与点添加蓝色。支持原生工具栏、菜单和特征树。",
+  "version": "0.5.0",
+  "description": "Onshape 多色图标、可选命令文字与分组，以及视图中的距离和红绿蓝 XYZ 测量标注。",
   "permissions": ["storage"],
   "action": {
     "default_title": "Onshape 多色图标",
@@ -10,12 +10,12 @@
   },
   "content_scripts": [{
     "matches": ["https://cad.onshape.com/*"],
-    "js": ["palette.js", "content.js", "command-labels.js", "grouped-toolbar.js"],
+    "js": ["palette.js", "content.js", "command-labels.js", "grouped-toolbar.js", "measurement.js"],
     "run_at": "document_idle",
     "all_frames": true
   }, {
     "matches": ["https://cad.onshape.com/*"],
-    "js": ["toolbar-bridge.js"],
+    "js": ["toolbar-bridge.js", "measurement-bridge.js"],
     "world": "MAIN",
     "run_at": "document_idle",
     "all_frames": true

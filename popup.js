@@ -7,7 +7,7 @@
   function draw() {
     for (const [key, input] of Object.entries(controls)) {
       if(key==='accent')input.value=current.accent;else input.checked = current[key];
-      input.disabled = key === 'groups' ? !current.labels : key !== "enabled" && key !== "labels" && !current.enabled;
+      input.disabled = key === 'groups' ? !current.labels : !['enabled','labels','measurement'].includes(key) && !current.enabled;
     }
   }
   function save(persist=true){
@@ -27,6 +27,7 @@
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab?.id) throw new Error("No tab");
       const reply = await chrome.tabs.sendMessage(tab.id, { type: "OSVC_STATUS" }, { frameId: 0 });
+      if(reply.version!==chrome.runtime.getManifest().version){status.textContent="页面还在运行旧版，请刷新 Onshape 文档。";return;}
       if (current.labels) {
         status.textContent = !reply.version || reply.version !== chrome.runtime.getManifest().version
           ? "页面还在运行旧版，请刷新 Onshape 文档。"
@@ -37,7 +38,7 @@
           : "命令文字已开启，当前未识别到名称。请确认已刷新 Onshape，并进入建模或装配工具栏。";
         return;
       }
-      if (!current.enabled) status.textContent = current.labels ? "多色图标已关闭，命令文字保持开启。" : "多色图标和命令文字已关闭，显示 Onshape 原有样式。";
+      if (!current.enabled) status.textContent = current.measurement ? "图标配色已关闭，视图测量标注保持开启。" : "多色图标和命令文字已关闭，显示 Onshape 原有样式。";
       else if (reply.counts.toolbar + reply.counts.tree === 0) status.textContent = "多色图标已开启。打开建模工具栏查看效果；嵌入页面内的图标单独生效，不计入此处数量。";
       else status.textContent = `主页面已识别工具栏 / 菜单 ${reply.counts.toolbar} 个、特征树 ${reply.counts.tree} 个原生图标。单色符号保留原有线条。`;
     } catch {

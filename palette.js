@@ -1,6 +1,6 @@
 /* Local overrides of Onshape's native SVG paint roles; no geometry replacement. */
 globalThis.OSVC = (() => {
-  const defaults = { enabled: true, toolbar: true, tree: true, labels: false, groups: false, accent: '#216bc4' };
+  const defaults = { enabled: true, toolbar: true, tree: true, labels: false, groups: false, measurement: true, accent: '#216bc4' };
   const scopes = {
     toolbar: ".os-tool-command-icon, .os-element-toolbar, .os-mini-toolbar-panel, .os-toolbar, .os-toolbar-container, .os-vue-custom-toolbar, [role=toolbar], [role=menu], .os-context-menu",
     tree: ".feature-list-container, .plg-feature-list, .os-feature-type-icon, .os-tree-container"
